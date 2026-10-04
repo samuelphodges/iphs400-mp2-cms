@@ -33,7 +33,14 @@ def spend(series: list[float | None]) -> float:
     >>> spend([None, 4.0, None, 7.0])
     3.0
     """
-    raise NotImplementedError("MP2 Exercise B: implement me with /tdd")
+    total, previous = 0.0, None
+    for value in series:
+        if value is None:
+            continue
+        if previous is not None and value > previous:
+            total += value - previous
+        previous = value
+    return total
 
 def read_rows(path: Path) -> list[dict]:
     with path.open(newline="") as f:
