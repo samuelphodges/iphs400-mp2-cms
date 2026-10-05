@@ -29,6 +29,10 @@ def list_pages(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(f"{_SELECT} ORDER BY pages.updated_at DESC, pages.id DESC").fetchall()
 
 
+def list_published(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(f"{_SELECT} WHERE pages.status = 'published'").fetchall()
+
+
 def get(conn: sqlite3.Connection, page_id: int) -> sqlite3.Row | None:
     return conn.execute(f"{_SELECT} WHERE pages.id = ?", (page_id,)).fetchone()
 
