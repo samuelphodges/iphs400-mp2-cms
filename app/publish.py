@@ -15,10 +15,13 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from app import db, pages, settings
+from app import db, pages, posts, settings
 from app.markdown import render_markdown
 
 HOME_SLUG = "home"
+EVENTS_SLUG = "alumni-events"
+SECTION_SLUGS = ("team-schedule", EVENTS_SLUG, "alumni-network")
+HOME_COUNT = 3  # Team Updates and Events shown on Home
 
 CSS = """/* Minimal starter styles — make them yours. */
 :root { color-scheme: light dark; }
@@ -49,6 +52,22 @@ def _navigation(published: list[sqlite3.Row]) -> list[dict[str, str]]:
     return [{"title": p["title"], "href": _filename(p["slug"])} for p in ordered]
 
 
+def _post_filenames(published: list[sqlite3.Row], taken: set[str]) -> dict[int, str]:
+    """One file per post. A page's file always wins a clash; the post is renamed."""
+    names: dict[int, str] = {}
+    for post in published:
+        name = f"post-{post['slug']}.html"
+        while name in taken:
+            name = name.removesuffix(".html") + "-post.html"
+        taken.add(name)
+        names[post["id"]] = name
+    return names
+
+
+def _summary(post: sqlite3.Row, names: dict[int, str]) -> dict[str, str]:
+    return {"title": post["title"], "href": names[post["id"]], "date": post["created_at"][:10]}
+
+
 def render_site(out: Path | None = None,
                 database_path: Path | str | None = None) -> Path:
     out = out or settings.SITE
@@ -57,6 +76,7 @@ def render_site(out: Path | None = None,
     conn = db.connect(database_path)
     try:
         published = pages.list_published(conn)
+        published_posts = posts.list_published(conn)  # newest first
     finally:
         conn.close()
 
@@ -66,18 +86,38 @@ def render_site(out: Path | None = None,
     env = environment()
     nav = _navigation(published)
     (out / "style.css").write_text(CSS)
-    link_targets = {"index.html", "style.css"} | {n["href"] for n in nav}
+    page_files = {_filename(p["slug"]) for p in published} | {"index.html", "style.css"}
+    post_files = _post_filenames(published_posts, set(page_files))
+    link_targets = page_files | set(post_files.values())
+    by_slug = {p["slug"]: p for p in published}
 
+    events = [_summary(p, post_files) for p in published_posts if p["post_type"] == "event"]
+    updates = [_summary(p, post_files) for p in published_posts
+               if p["post_type"] == "team_update"]
+    home_sections = {
+        "updates": updates[:HOME_COUNT], "events": events[:HOME_COUNT],
+        "section_links": [{"title": by_slug[s]["title"], "href": _filename(s)}
+                          for s in SECTION_SLUGS if s in by_slug]}
+    sections_for = {HOME_SLUG: home_sections, EVENTS_SLUG: {"events": events}}
+
+    common = dict(site_title=settings.SITE_TITLE, nav=nav, css_path="style.css",
+                  home_path="index.html")
     for page in published:
         (out / _filename(page["slug"])).write_text(
             env.get_template("public/page.html").render(
-                title=page["title"], site_title=settings.SITE_TITLE, nav=nav,
+                title=page["title"],
                 body=render_markdown(page["body"], link_targets=link_targets),
-                css_path="style.css", home_path="index.html"))
+                **sections_for.get(page["slug"], {}), **common))
 
-    if not any(p["slug"] == HOME_SLUG for p in published):
+    if HOME_SLUG not in by_slug:
         (out / "index.html").write_text(
             env.get_template("public/home.html").render(
-                title=settings.SITE_TITLE, site_title=settings.SITE_TITLE, items=[],
-                nav=nav, css_path="style.css", home_path="index.html"))
+                title=settings.SITE_TITLE, **home_sections, **common))
+
+    for post in published_posts:
+        (out / post_files[post["id"]]).write_text(
+            env.get_template("public/post.html").render(
+                title=post["title"], type_label=posts.POST_TYPES[post["post_type"]],
+                date=post["created_at"][:10],
+                body=render_markdown(post["body"], link_targets=link_targets), **common))
     return out

@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-from app import db, settings, users
+from app import db, posts, settings, users
 
 
 def main() -> int:
@@ -39,9 +39,23 @@ def main() -> int:
                 print(f"Created {role}: {email}")
             else:
                 print(f"Exists: {email}")
+        editor = users.get_by_email(conn, "editor@example.test")
+        if editor is not None and not posts.list_posts(conn):
+            for title, post_type, status, body in (
+                ("Spring Reunion Weekend", "event", "published",
+                 "Join us on campus for the annual alumni reunion."),
+                ("Game-Watch at the Pub", "event", "published",
+                 "Watch the conference final together."),
+                ("Fall Ball Wrap-Up", "team_update", "published",
+                 "The team finished fall ball with a strong week."),
+                ("Draft: Banquet Details", "event", "draft", "Still to be confirmed."),
+            ):
+                posts.create(conn, title=title, slug=posts.slugify(title), body=body,
+                             status=status, post_type=post_type, author_id=editor["id"])
+            print("Created sample posts")
     finally:
         conn.close()
-    # TODO (later tickets): pages, posts and listings.
+    # TODO (later tickets): listings.
     return 0
 
 

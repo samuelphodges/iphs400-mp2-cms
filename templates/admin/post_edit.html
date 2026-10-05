@@ -1,0 +1,42 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+  <h1>{{ 'Edit post' if post else 'New post' }}</h1>
+  <form method="post" action="{{ '/admin/posts/%d' % post.id if post else '/admin/posts' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% if post %}<input type="hidden" name="post_id" value="{{ post.id }}">{% endif %}
+    <label for="post_type">Post Type</label>
+    <select id="post_type" name="post_type" required>
+      {% for value, label in post_types.items() %}
+      <option value="{{ value }}" {{ 'selected' if form.post_type == value }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <label for="title">Title</label>
+    <input id="title" name="title" value="{{ form.title }}" required>
+    <label for="slug">Slug (the web address; leave blank to generate it from the title)</label>
+    <input id="slug" name="slug" value="{{ form.slug }}">
+    <label for="body">Body (Markdown)</label>
+    <textarea id="body" name="body" rows="14">{{ form.body }}</textarea>
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      {% for s in ('draft', 'published') %}
+      <option value="{{ s }}" {{ 'selected' if form.status == s }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <p>
+      <button type="submit">Save</button>
+      <button type="submit" formaction="/admin/posts/preview">Preview</button>
+      <a href="/admin/content">Back to content</a>
+    </p>
+  </form>
+  {% if post %}
+  <dl>
+    <dt>Author</dt><dd>{{ post.author_name }}</dd>
+    <dt>Created</dt><dd>{{ post.created_at }}</dd>
+    <dt>Updated</dt><dd>{{ post.updated_at }}</dd>
+  </dl>
+  {% endif %}
+  {% if preview is not none %}
+  <h2>Preview</h2>
+  <div id="preview">{{ preview | safe }}</div>
+  {% endif %}
+{% endblock %}

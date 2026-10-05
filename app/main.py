@@ -13,7 +13,7 @@ from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app import db, settings
-from app.routes import auth, pages
+from app.routes import auth, content, pages, posts
 from app.web import LoginRequired, current_user, render, templates
 
 
@@ -32,6 +32,8 @@ def create_app(database_path: Path | str | None = None) -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(pages.router)
+    app.include_router(posts.router)
+    app.include_router(content.router)
 
     @app.get("/admin")
     def admin_home(request: Request, user=Depends(current_user)):

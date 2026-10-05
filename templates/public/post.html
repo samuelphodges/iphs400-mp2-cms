@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
   <h1>{{ title }}</h1>
-  {% include "public/_sections.html" %}
+  <p><small>{{ type_label }} · {{ date }}</small></p>
+  {{ body | safe }}
 {% endblock %}

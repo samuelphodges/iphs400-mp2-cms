@@ -1,0 +1,46 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+  <h1>Content</h1>
+  <p><a href="/admin/pages/new">New page</a> · <a href="/admin/posts/new">New post</a></p>
+  <form method="get" action="/admin/content">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">All</option>
+      {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}
+    </select>
+    <label for="type">Type</label>
+    <select id="type" name="type">
+      <option value="">All</option>
+      {% for value, label in types.items() %}<option value="{{ value }}" {{ 'selected' if type == value }}>{{ label }}</option>{% endfor %}
+    </select>
+    <p><button type="submit">Filter</button></p>
+  </form>
+  {% if items %}
+  <table>
+    <thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Last update</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for i in items %}
+      {% set base = '/admin/pages' if i.kind == 'page' else '/admin/posts' %}
+      <tr>
+        <td><a href="{{ base }}/{{ i.id }}/edit">{{ i.title }}</a></td>
+        <td>{{ i.type_label }}</td>
+        <td>{{ i.status }}</td>
+        <td>{{ i.updated_at }}</td>
+        <td>
+          <form method="post" action="{{ base }}/{{ i.id }}/{{ 'unpublish' if i.status == 'published' else 'publish' }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit">{{ 'Mark draft' if i.status == 'published' else 'Mark published' }}</button>
+          </form>
+          <form method="post" action="{{ base }}/{{ i.id }}/delete" onsubmit="return confirm('Delete this item?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Nothing matches.</p>
+  {% endif %}
+{% endblock %}

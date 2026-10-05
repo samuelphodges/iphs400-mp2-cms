@@ -25,6 +25,18 @@ CREATE TABLE IF NOT EXISTS pages (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS posts (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    slug       TEXT NOT NULL UNIQUE,
+    body       TEXT NOT NULL DEFAULT '',
+    status     TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    post_type  TEXT NOT NULL CHECK (post_type IN ('event', 'team_update')),
+    author_id  INTEGER NOT NULL REFERENCES users(id),
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 """
 
 

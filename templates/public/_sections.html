@@ -1,0 +1,19 @@
+{% if section_links %}
+<ul>{% for link in section_links %}<li><a href="{{ link.href }}">{{ link.title }}</a></li>{% endfor %}</ul>
+{% endif %}
+{% if updates is defined %}
+<section>
+  <h2>Team Updates</h2>
+  {% if updates %}
+  <ul>{% for p in updates %}<li><a href="{{ p.href }}">{{ p.title }}</a> <small>{{ p.date }}</small></li>{% endfor %}</ul>
+  {% else %}<p>No team updates yet.</p>{% endif %}
+</section>
+{% endif %}
+{% if events is defined %}
+<section>
+  <h2>Events</h2>
+  {% if events %}
+  <ul>{% for p in events %}<li><a href="{{ p.href }}">{{ p.title }}</a> <small>{{ p.date }}</small></li>{% endfor %}</ul>
+  {% else %}<p>No events yet.</p>{% endif %}
+</section>
+{% endif %}
