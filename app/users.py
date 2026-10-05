@@ -34,6 +34,7 @@ def create_user(conn: sqlite3.Connection, *, email: str, name: str,
         (email.strip(), name, hash_password(password), role),
     )
     conn.commit()
+    assert cur.lastrowid is not None
     return cur.lastrowid
 
 

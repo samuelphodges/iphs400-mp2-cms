@@ -16,7 +16,11 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=8.3", "httpx>=0.28"]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.28",
+    "mypy>=2.4.0",
+]
 
 [project.scripts]
 cms = "app.cli:main"
