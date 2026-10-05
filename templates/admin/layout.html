@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ title }}{% endblock %} · Admin</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; color: #222; }
+    header { display: flex; justify-content: space-between; align-items: center;
+             gap: 1rem; padding: .75rem 1rem; background: #4b2e83; color: #fff; }
+    header a, header button { color: #fff; }
+    header form { display: inline; margin: 0; }
+    header button { background: none; border: 1px solid #fff; border-radius: 4px;
+                    padding: .25rem .6rem; cursor: pointer; }
+    main { max-width: 40rem; margin: 1.5rem auto; padding: 0 1rem; }
+    label { display: block; margin: .75rem 0 .25rem; }
+    input { width: 100%; padding: .5rem; box-sizing: border-box; }
+    .msg-error { background: #fde8e8; border: 1px solid #c53030; padding: .6rem; }
+    .msg-ok { background: #e6f4ea; border: 1px solid #2f855a; padding: .6rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/admin">Kenyon Baseball Alumni · Admin</a>
+    {% if user %}
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <span>Signed in as {{ user["name"] }} ({{ user["role"] }})</span>
+      <button type="submit">Sign out</button>
+    </form>
+    {% endif %}
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

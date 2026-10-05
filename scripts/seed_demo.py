@@ -15,6 +15,8 @@ from __future__ import annotations
 import os
 import sys
 
+from app import db, settings, users
+
 
 def main() -> int:
     admin_pw = os.environ.get("CMS_ADMIN_PASSWORD")
@@ -24,9 +26,22 @@ def main() -> int:
               "(copy .env.example).")
         return 1
 
-    # TODO (your tickets): create the users, then the demo content.
-    print("Nothing to seed yet: no content types exist. "
-          "Extend scripts/seed_demo.py as you build T01+.")
+    db.init_db(settings.DATABASE_PATH)
+    conn = db.connect(settings.DATABASE_PATH)
+    try:
+        for email, name, password, role in (
+            ("admin@example.test", "Matt Burdette", admin_pw, "admin"),
+            ("editor@example.test", "Joe", editor_pw, "editor"),
+        ):
+            if users.get_by_email(conn, email) is None:
+                users.create_user(conn, email=email, name=name,
+                                  password=password, role=role)
+                print(f"Created {role}: {email}")
+            else:
+                print(f"Exists: {email}")
+    finally:
+        conn.close()
+    # TODO (later tickets): pages, posts and listings.
     return 0
 
 

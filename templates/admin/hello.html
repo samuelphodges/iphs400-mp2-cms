@@ -1,5 +1,5 @@
-{% extends "base.html" %}
+{% extends "admin/layout.html" %}
 {% block content %}
-  <h1>T00: hello admin</h1>
-  <p>The stack works. Now build ticket T01.</p>
+  <h1>Admin home</h1>
+  <p>Welcome, {{ user["name"] }}.</p>
 {% endblock %}
