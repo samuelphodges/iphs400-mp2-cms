@@ -34,4 +34,8 @@ Client: Kenyon College Varsity Baseball Team Alumni.
 
 **Alumni Contact Line**: The single public line on the Alumni Network page telling visitors to email the Second Editor, who then introduces them to the alumnus. It is the only way to reach an alumnus through the site.
 
+**Page**: A content item with a title, slug and Markdown body, managed in the admin console. A published Page appears in the public navigation. Home, Team Schedule, Alumni Events, Alumni Network and About are Pages.
+
+**Published status**: A Page or post is *draft* or *published*. Setting it to published makes the item eligible for the site; it is not live until **Publish** runs. The admin buttons say "Mark published" / "Mark draft" to keep the two apart.
+
 **Publish**: The explicit step that turns published content into the public site. Edits are not live until the Head Coach (or the builder, in the demo) runs it.

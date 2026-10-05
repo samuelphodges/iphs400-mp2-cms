@@ -12,9 +12,14 @@
     header form { display: inline; margin: 0; }
     header button { background: none; border: 1px solid #fff; border-radius: 4px;
                     padding: .25rem .6rem; cursor: pointer; }
-    main { max-width: 40rem; margin: 1.5rem auto; padding: 0 1rem; }
+    main { max-width: 52rem; margin: 1.5rem auto; padding: 0 1rem; }
     label { display: block; margin: .75rem 0 .25rem; }
-    input { width: 100%; padding: .5rem; box-sizing: border-box; }
+    textarea { width: 100%; padding: .5rem; box-sizing: border-box; font: inherit; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: .4rem; border-bottom: 1px solid #ddd; }
+    td form { display: inline; }
+    #preview { border: 1px solid #ccc; padding: 0 1rem; margin-top: 1rem; }
+    input:not([type=hidden]) { width: 100%; padding: .5rem; box-sizing: border-box; }
     .msg-error { background: #fde8e8; border: 1px solid #c53030; padding: .6rem; }
     .msg-ok { background: #e6f4ea; border: 1px solid #2f855a; padding: .6rem; }
   </style>
@@ -22,6 +27,7 @@
 <body>
   <header>
     <a href="/admin">Kenyon Baseball Alumni · Admin</a>
+    {% if user %}<nav><a href="/admin/pages">Pages</a></nav>{% endif %}
     {% if user %}
     <form method="post" action="/logout">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -30,6 +36,9 @@
     </form>
     {% endif %}
   </header>
-  <main>{% block content %}{% endblock %}</main>
+  <main>
+  {% if flash %}<p class="msg-{{ flash.kind }}" role="{{ 'alert' if flash.kind == 'error' else 'status' }}">{{ flash.text }}</p>{% endif %}
+  {% block content %}{% endblock %}
+  </main>
 </body>
 </html>

@@ -1,0 +1,36 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+  <h1>{{ 'Edit page' if page else 'New page' }}</h1>
+  <form method="post" action="{{ '/admin/pages/%d' % page.id if page else '/admin/pages' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% if page %}<input type="hidden" name="page_id" value="{{ page.id }}">{% endif %}
+    <label for="title">Title</label>
+    <input id="title" name="title" value="{{ form.title }}" required>
+    <label for="slug">Slug (the web address; leave blank to generate it from the title)</label>
+    <input id="slug" name="slug" value="{{ form.slug }}">
+    <label for="body">Body (Markdown)</label>
+    <textarea id="body" name="body" rows="14">{{ form.body }}</textarea>
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      {% for s in ('draft', 'published') %}
+      <option value="{{ s }}" {{ 'selected' if form.status == s }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <p>
+      <button type="submit">Save</button>
+      <button type="submit" formaction="/admin/pages/preview">Preview</button>
+      <a href="/admin/pages">Back to pages</a>
+    </p>
+  </form>
+  {% if page %}
+  <dl>
+    <dt>Author</dt><dd>{{ page.author_name }}</dd>
+    <dt>Created</dt><dd>{{ page.created_at }}</dd>
+    <dt>Updated</dt><dd>{{ page.updated_at }}</dd>
+  </dl>
+  {% endif %}
+  {% if preview is not none %}
+  <h2>Preview</h2>
+  <div id="preview">{{ preview | safe }}</div>
+  {% endif %}
+{% endblock %}

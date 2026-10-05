@@ -53,9 +53,14 @@ async def verify_csrf(request: Request) -> None:
         raise HTTPException(status_code=403, detail="Missing or invalid CSRF token.")
 
 
+def flash(request: Request, text: str, kind: str = "ok") -> None:
+    """Queue a message to show on the next page (success "ok" or "error")."""
+    request.session["flash"] = {"kind": kind, "text": text}
+
+
 def render(request: Request, name: str, context: dict | None = None,
            status_code: int = 200, user=None):
     ctx = {"title": settings.SITE_TITLE, "csrf_token": csrf_token(request),
-           "user": user}
+           "user": user, "flash": request.session.pop("flash", None)}
     ctx.update(context or {})
     return templates.TemplateResponse(request, name, ctx, status_code=status_code)
