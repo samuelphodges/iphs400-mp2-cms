@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-from app import db, posts, settings, users
+from app import db, pages, posts, settings, users
 
 
 def main() -> int:
@@ -39,6 +39,25 @@ def main() -> int:
                 print(f"Created {role}: {email}")
             else:
                 print(f"Exists: {email}")
+        admin = users.get_by_email(conn, "admin@example.test")
+        if admin is not None and not pages.list_pages(conn):
+            for title, body, locked in (
+                ("Home", "Welcome, Kenyon baseball alumni and fans.", False),
+                ("Team Schedule", "| Date | Opponent |\n|---|---|\n| TBD | TBD |", True),
+                ("Alumni Events", "Gatherings for alumni of the program.", False),
+                ("Alumni Network", "Alumni who chose to be listed.", False),
+                ("About", "About the Kenyon Varsity Baseball alumni site.", False),
+            ):
+                page_id = pages.create(conn, title=title, slug=pages.slugify(title),
+                                       body=body, status="published",
+                                       author_id=admin["id"])
+                if locked:
+                    pages.set_locked(conn, page_id, True)
+            print("Created pages (Team Schedule is Locked)")
+        # A demo database made before T05 has an unlocked Team Schedule.
+        schedule = conn.execute("SELECT id FROM pages WHERE slug = 'team-schedule'").fetchone()
+        if schedule is not None:
+            pages.set_locked(conn, schedule["id"], True)
         editor = users.get_by_email(conn, "editor@example.test")
         if editor is not None and not posts.list_posts(conn):
             for title, post_type, status, body in (

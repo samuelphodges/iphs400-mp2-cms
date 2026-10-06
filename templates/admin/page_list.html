@@ -8,10 +8,13 @@
     <tbody>
     {% for p in pages %}
       <tr>
-        <td><a href="/admin/pages/{{ p.id }}/edit">{{ p.title }}</a></td>
+        <td><a href="/admin/pages/{{ p.id }}/edit">{{ p.title }}</a>{% if p.locked %} <strong>(Locked)</strong>{% endif %}</td>
         <td>{{ p.status }}</td>
         <td>{{ p.updated_at }}</td>
         <td>
+          {% if p.locked and user["role"] != "admin" %}
+          <em>Only the Head Coach can change this page.</em>
+          {% else %}
           <form method="post" action="/admin/pages/{{ p.id }}/{{ 'unpublish' if p.status == 'published' else 'publish' }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button type="submit">{{ 'Mark draft' if p.status == 'published' else 'Mark published' }}</button>
@@ -20,6 +23,13 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <button type="submit">Delete</button>
           </form>
+          {% endif %}
+          {% if user["role"] == "admin" %}
+          <form method="post" action="/admin/pages/{{ p.id }}/{{ 'unlock' if p.locked else 'lock' }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit">{{ 'Unlock' if p.locked else 'Lock' }}</button>
+          </form>
+          {% endif %}
         </td>
       </tr>
     {% endfor %}

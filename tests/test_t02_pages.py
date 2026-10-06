@@ -173,7 +173,8 @@ def test_every_page_form_rejects_a_post_without_csrf(client_as):
     pid = _page_id(_create(c, title="About"))
     posts = [("/admin/pages", {}), (f"/admin/pages/{pid}", {}),
              (f"/admin/pages/{pid}/publish", {}), (f"/admin/pages/{pid}/unpublish", {}),
-             (f"/admin/pages/{pid}/delete", {}), ("/admin/pages/preview", {})]
+             (f"/admin/pages/{pid}/delete", {}), ("/admin/pages/preview", {}),
+             (f"/admin/pages/{pid}/lock", {}), (f"/admin/pages/{pid}/unlock", {})]
     form = {"title": "x", "slug": "x2", "body": "b", "status": "draft"}
     for path, _ in posts:
         assert c.post(path, data=form).status_code == 403, path
@@ -190,7 +191,8 @@ def test_every_post_route_is_covered_by_the_csrf_test(client_as):
     assert paths == {"/admin/pages", "/admin/pages/{page_id}",
                      "/admin/pages/{page_id}/publish",
                      "/admin/pages/{page_id}/unpublish",
-                     "/admin/pages/{page_id}/delete", "/admin/pages/preview"}
+                     "/admin/pages/{page_id}/delete", "/admin/pages/preview",
+                     "/admin/pages/{page_id}/lock", "/admin/pages/{page_id}/unlock"}
 
 
 def test_anonymous_visitor_is_redirected_to_login_on_every_page_route(client):

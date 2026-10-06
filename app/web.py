@@ -36,6 +36,21 @@ def current_user(request: Request, conn: sqlite3.Connection = Depends(get_db)):
     return user
 
 
+class Refused(Exception):
+    """The signed-in user may not do this; the app turns it into the refusal page."""
+
+    def __init__(self, message: str = "Only the Head Coach can do this."):
+        super().__init__(message)
+        self.message = message
+
+
+def require_admin(user=Depends(current_user)):
+    """Dependency for admin-only routes: the signed-in user must be an admin."""
+    if user["role"] != "admin":
+        raise Refused()
+    return user
+
+
 def csrf_token(request: Request) -> str:
     token = request.session.get("csrf")
     if not token:

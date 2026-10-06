@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS pages (
     slug       TEXT NOT NULL UNIQUE,
     body       TEXT NOT NULL DEFAULT '',
     status     TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    locked     INTEGER NOT NULL DEFAULT 0,
     author_id  INTEGER NOT NULL REFERENCES users(id),
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
@@ -50,6 +51,10 @@ def init_db(path: Path | str) -> None:
     conn = connect(path)
     try:
         conn.executescript(SCHEMA)
+        # Databases made before T05 have no Locked flag on pages.
+        columns = [r["name"] for r in conn.execute("PRAGMA table_info(pages)")]
+        if "locked" not in columns:
+            conn.execute("ALTER TABLE pages ADD COLUMN locked INTEGER NOT NULL DEFAULT 0")
         conn.commit()
     finally:
         conn.close()

@@ -8,17 +8,29 @@ from fastapi.responses import RedirectResponse
 
 from app import pages
 from app.markdown import render_markdown
-from app.web import current_user, flash, get_db, render, verify_csrf
+from app.web import Refused, current_user, flash, get_db, render, require_admin, verify_csrf
 
 # Every route here needs a signed-in user; every POST also needs a CSRF token.
 router = APIRouter(prefix="/admin/pages", dependencies=[Depends(current_user)])
 csrf_required = [Depends(verify_csrf)]
 
 
+LOCKED_MESSAGE = ("This page is Locked. Only the Head Coach can change it: you can read it, "
+                  "but not edit, publish, unpublish or delete it.")
+
+
 def _page_or_404(conn: sqlite3.Connection, page_id: int) -> sqlite3.Row:
     page = pages.get(conn, page_id)
     if page is None:
         raise HTTPException(status_code=404, detail="No such page.")
+    return page
+
+
+def _changeable_page(conn: sqlite3.Connection, page_id: int, user) -> sqlite3.Row:
+    """The page, if this user may change it; Locked pages are for admins only."""
+    page = _page_or_404(conn, page_id)
+    if page["locked"] and user["role"] != "admin":
+        raise Refused(LOCKED_MESSAGE)
     return page
 
 
@@ -99,7 +111,7 @@ def edit_page(page_id: int, request: Request, user=Depends(current_user),
 def save_page(page_id: int, request: Request, title: str = Form(""),
               slug: str = Form(""), body: str = Form(""), status: str = Form("draft"),
               user=Depends(current_user), conn: sqlite3.Connection = Depends(get_db)):
-    page = _page_or_404(conn, page_id)
+    page = _changeable_page(conn, page_id, user)
     fields, error = _clean(title, slug, body, status)
     if error:
         return _editor(request, user, fields, page, status_code=422, error=error)
@@ -113,24 +125,43 @@ def save_page(page_id: int, request: Request, title: str = Form(""),
 
 
 @router.post("/{page_id}/publish", dependencies=csrf_required)
-def publish_page(page_id: int, request: Request, conn: sqlite3.Connection = Depends(get_db)):
-    page = _page_or_404(conn, page_id)
+def publish_page(page_id: int, request: Request, user=Depends(current_user),
+                 conn: sqlite3.Connection = Depends(get_db)):
+    page = _changeable_page(conn, page_id, user)
     pages.set_status(conn, page_id, "published")
     flash(request, f"Page “{page['title']}” published.")
     return RedirectResponse("/admin/pages", status_code=303)
 
 
 @router.post("/{page_id}/unpublish", dependencies=csrf_required)
-def unpublish_page(page_id: int, request: Request, conn: sqlite3.Connection = Depends(get_db)):
-    page = _page_or_404(conn, page_id)
+def unpublish_page(page_id: int, request: Request, user=Depends(current_user),
+                   conn: sqlite3.Connection = Depends(get_db)):
+    page = _changeable_page(conn, page_id, user)
     pages.set_status(conn, page_id, "draft")
     flash(request, f"Page “{page['title']}” unpublished.")
     return RedirectResponse("/admin/pages", status_code=303)
 
 
 @router.post("/{page_id}/delete", dependencies=csrf_required)
-def delete_page(page_id: int, request: Request, conn: sqlite3.Connection = Depends(get_db)):
-    page = _page_or_404(conn, page_id)
+def delete_page(page_id: int, request: Request, user=Depends(current_user),
+                conn: sqlite3.Connection = Depends(get_db)):
+    page = _changeable_page(conn, page_id, user)
     pages.delete(conn, page_id)
     flash(request, f"Page “{page['title']}” deleted.")
+    return RedirectResponse("/admin/pages", status_code=303)
+
+
+@router.post("/{page_id}/lock", dependencies=[*csrf_required, Depends(require_admin)])
+def lock_page(page_id: int, request: Request, conn: sqlite3.Connection = Depends(get_db)):
+    page = _page_or_404(conn, page_id)
+    pages.set_locked(conn, page_id, True)
+    flash(request, f"Page “{page['title']}” locked. Only the Head Coach can change it.")
+    return RedirectResponse("/admin/pages", status_code=303)
+
+
+@router.post("/{page_id}/unlock", dependencies=[*csrf_required, Depends(require_admin)])
+def unlock_page(page_id: int, request: Request, conn: sqlite3.Connection = Depends(get_db)):
+    page = _page_or_404(conn, page_id)
+    pages.set_locked(conn, page_id, False)
+    flash(request, f"Page “{page['title']}” unlocked.")
     return RedirectResponse("/admin/pages", status_code=303)

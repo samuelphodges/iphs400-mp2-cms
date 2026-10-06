@@ -12,9 +12,23 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import db, settings
+from app import db, settings, users
 from app.routes import auth, content, pages, posts
-from app.web import LoginRequired, current_user, render, templates
+from app.web import LoginRequired, Refused, current_user, render, templates
+
+
+def _refusal(request: Request, user=None, message: str = Refused().message):
+    return render(request, "admin/refused.html", {"title": "Not allowed", "message": message},
+                  status_code=403, user=user or _session_user(request))
+
+
+def _session_user(request: Request):
+    conn = db.connect(request.app.state.database_path)
+    try:
+        user_id = request.session.get("user_id")
+        return users.get_by_id(conn, user_id) if user_id else None
+    finally:
+        conn.close()
 
 
 def create_app(database_path: Path | str | None = None) -> FastAPI:
@@ -30,6 +44,10 @@ def create_app(database_path: Path | str | None = None) -> FastAPI:
     def _login_required(request: Request, exc: LoginRequired):
         return RedirectResponse("/login", status_code=303)
 
+    @app.exception_handler(Refused)
+    def _refused(request: Request, exc: Refused):
+        return _refusal(request, message=exc.message)
+
     app.include_router(auth.router)
     app.include_router(pages.router)
     app.include_router(posts.router)
@@ -38,6 +56,10 @@ def create_app(database_path: Path | str | None = None) -> FastAPI:
     @app.get("/admin")
     def admin_home(request: Request, user=Depends(current_user)):
         return render(request, "admin/hello.html", {"title": "Admin"}, user=user)
+
+    @app.get("/admin/refused")
+    def refused_page(request: Request, user=Depends(current_user)):
+        return _refusal(request, user)
 
     @app.get("/")
     def public_home(request: Request):

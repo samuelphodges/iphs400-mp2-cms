@@ -71,6 +71,11 @@ def set_status(conn: sqlite3.Connection, page_id: int, status: str) -> None:
     conn.commit()
 
 
+def set_locked(conn: sqlite3.Connection, page_id: int, locked: bool) -> None:
+    conn.execute("UPDATE pages SET locked = ? WHERE id = ?", (int(locked), page_id))
+    conn.commit()
+
+
 def delete(conn: sqlite3.Connection, page_id: int) -> None:
     conn.execute("DELETE FROM pages WHERE id = ?", (page_id,))
     conn.commit()
