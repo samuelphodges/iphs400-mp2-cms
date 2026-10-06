@@ -73,7 +73,7 @@ class Checks:
                      "iphs400_mp2-web-cms_report_{first}-{last}_{YYYYMMDD}.md, lowercase")
         transcripts = list((ROOT / "docs" / "transcripts").glob("*.md"))
         bad = [p.name for p in transcripts if not TRANSCRIPT.match(p.name)]
-        self.add(transcripts and not bad, "transcripts present and named correctly",
+        self.add(bool(transcripts) and not bad, "transcripts present and named correctly",
                  f"{len(transcripts)} file(s); bad: {bad or 'none'}",
                  "iphs400_mp2-cms_chat-session_{NN}_{first}-{last}_{YYYYMMDD}.md")
 
