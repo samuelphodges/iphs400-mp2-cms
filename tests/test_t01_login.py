@@ -122,10 +122,10 @@ def test_session_cookie_records_the_role(client_as):
 
 def test_every_admin_route_redirects_anonymous_visitors(client):
     """Enumerated from the app's own router, so a new route cannot escape."""
-    paths = [r.path for r in client.app.routes
-             if getattr(r, "path", "").startswith("/admin")
-             and "{" not in r.path]
-    assert "/admin" in paths
+    # The OpenAPI schema lists routes added with include_router, which app.routes hides.
+    paths = [path for path, ops in client.app.openapi()["paths"].items()
+             if path.startswith("/admin") and "get" in ops and "{" not in path]
+    assert "/admin" in paths and "/admin/users" in paths
     for path in paths:
         response = client.get(path, follow_redirects=False)
         assert response.status_code == 303, path

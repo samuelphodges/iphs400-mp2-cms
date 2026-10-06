@@ -31,6 +31,10 @@ body { font: 16px/1.6 system-ui, sans-serif; margin: 0 auto; max-width: 42rem; p
 header a { font-weight: 700; text-decoration: none; }
 nav ul { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
 main { margin-block: 2rem; }
+body { overflow-wrap: anywhere; }
+img, video { max-width: 100%; height: auto; }
+table { display: block; max-width: 100%; overflow-x: auto; }
+pre { max-width: 100%; overflow-x: auto; }
 """
 
 

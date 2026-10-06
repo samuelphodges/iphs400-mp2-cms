@@ -38,4 +38,6 @@ Client: Kenyon College Varsity Baseball Team Alumni.
 
 **Published status**: A Page or post is *draft* or *published*. Setting it to published makes the item eligible for the site; it is not live until **Publish** runs. The admin buttons say "Mark published" / "Mark draft" to keep the two apart.
 
+**Dashboard**: The admin console's first screen. It shows counts of posts, pages, drafts and listings, and links to Content, Listings and Users (Users for the Head Coach only).
+
 **Publish**: The explicit step that turns published content into the public site. Edits are not live until the Head Coach (or the builder, in the demo) runs it.

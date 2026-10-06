@@ -1,0 +1,11 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+  <h1>Dashboard</h1>
+  <p>Welcome, {{ user["name"] }}.</p>
+  <ul class="counts">
+    <li><strong data-count="posts">{{ counts.posts }}</strong> Posts</li>
+    <li><strong data-count="pages">{{ counts.pages }}</strong> Pages</li>
+    <li><strong data-count="drafts">{{ counts.drafts }}</strong> Drafts</li>
+    <li><strong data-count="listings">{{ counts.listings }}</strong> Listings</li>
+  </ul>
+{% endblock %}

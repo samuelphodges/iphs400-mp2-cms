@@ -13,7 +13,7 @@ from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app import db, settings, users
-from app.routes import auth, content, listings, pages, posts, users as users_routes
+from app.routes import auth, content, dashboard, listings, pages, posts, users as users_routes
 from app.web import LoginRequired, Refused, current_user, render, templates
 
 
@@ -51,13 +51,10 @@ def create_app(database_path: Path | str | None = None) -> FastAPI:
     app.include_router(auth.router)
     app.include_router(pages.router)
     app.include_router(posts.router)
+    app.include_router(dashboard.router)
     app.include_router(content.router)
     app.include_router(listings.router)
     app.include_router(users_routes.router)
-
-    @app.get("/admin")
-    def admin_home(request: Request, user=Depends(current_user)):
-        return render(request, "admin/hello.html", {"title": "Admin"}, user=user)
 
     @app.get("/admin/refused")
     def refused_page(request: Request, user=Depends(current_user)):

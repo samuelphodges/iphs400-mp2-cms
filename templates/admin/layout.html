@@ -15,7 +15,14 @@
     main { max-width: 52rem; margin: 1.5rem auto; padding: 0 1rem; }
     label { display: block; margin: .75rem 0 .25rem; }
     textarea { width: 100%; padding: .5rem; box-sizing: border-box; font: inherit; }
-    table { border-collapse: collapse; width: 100%; }
+    body { overflow-wrap: anywhere; }
+    header, nav { flex-wrap: wrap; }
+    img, textarea, select { max-width: 100%; }
+    table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+    .counts { list-style: none; padding: 0; display: grid; gap: .75rem;
+              grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+    .counts li { border: 1px solid #ddd; border-radius: 6px; padding: .75rem; }
+    .counts strong { display: block; font-size: 1.75rem; }
     th, td { text-align: left; padding: .4rem; border-bottom: 1px solid #ddd; }
     td form { display: inline; }
     #preview { border: 1px solid #ccc; padding: 0 1rem; margin-top: 1rem; }
@@ -27,7 +34,7 @@
 <body>
   <header>
     <a href="/admin">Kenyon Baseball Alumni · Admin</a>
-    {% if user %}<nav><a href="/admin/content">Content</a> · <a href="/admin/pages">Pages</a> · <a href="/admin/posts/new">New post</a> · <a href="/admin/listings">Listings</a>{% if user["role"] == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</nav>{% endif %}
+    {% if user %}<nav><a href="/admin">Dashboard</a> · <a href="/admin/content">Content</a> · <a href="/admin/listings">Listings</a>{% if user["role"] == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</nav>{% endif %}
     {% if user %}
     <form method="post" action="/logout">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
