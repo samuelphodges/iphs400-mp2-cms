@@ -65,3 +65,19 @@ def authenticate(conn: sqlite3.Connection, email: str, password: str
     if not user["active"]:
         return None, "inactive"
     return user, None
+
+
+def list_users(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM users ORDER BY name COLLATE NOCASE, id").fetchall()
+
+
+def set_role(conn: sqlite3.Connection, user_id: int, role: str) -> None:
+    if role not in ROLES:
+        raise ValueError(f"unknown role: {role}")
+    conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
+    conn.commit()
+
+
+def set_active(conn: sqlite3.Connection, user_id: int, active: bool) -> None:
+    conn.execute("UPDATE users SET active = ? WHERE id = ?", (int(active), user_id))
+    conn.commit()
