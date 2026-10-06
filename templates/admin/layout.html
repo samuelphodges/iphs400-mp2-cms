@@ -27,7 +27,7 @@
 <body>
   <header>
     <a href="/admin">Kenyon Baseball Alumni · Admin</a>
-    {% if user %}<nav><a href="/admin/content">Content</a> · <a href="/admin/pages">Pages</a> · <a href="/admin/posts/new">New post</a>{% if user["role"] == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</nav>{% endif %}
+    {% if user %}<nav><a href="/admin/content">Content</a> · <a href="/admin/pages">Pages</a> · <a href="/admin/posts/new">New post</a> · <a href="/admin/listings">Listings</a>{% if user["role"] == "admin" %} · <a href="/admin/users">Users</a>{% endif %}</nav>{% endif %}
     {% if user %}
     <form method="post" action="/logout">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

@@ -38,6 +38,17 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS listings (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT NOT NULL,
+    email        TEXT NOT NULL,
+    class_year   INTEGER,
+    consent_date TEXT,
+    recorded_by  INTEGER NOT NULL REFERENCES users(id),
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+);
 """
 
 

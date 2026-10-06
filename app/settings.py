@@ -14,3 +14,5 @@ SITE_TITLE = os.environ.get("CMS_SITE_TITLE", "My CMS")
 # Set this to your Pages URL once you deploy, e.g.
 # https://yourname.github.io/iphs400-mp2-cms/
 BASE_PATH = os.environ.get("CMS_BASE_PATH", "")
+# Joe's public address for the Alumni Contact Line (a site setting, not a Listing field).
+CONTACT_EMAIL = os.environ.get("CMS_CONTACT_EMAIL", "editor@example.test")

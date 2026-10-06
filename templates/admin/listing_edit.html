@@ -1,0 +1,27 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+  <h1>{{ 'Edit listing' if listing else 'New listing' }}</h1>
+  <form method="post" action="{{ '/admin/listings/%d' % listing.id if listing else '/admin/listings' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="name">Name (the only thing published)</label>
+    <input id="name" name="name" value="{{ form.name }}" required>
+    <label for="email">Email (never published)</label>
+    <input id="email" name="email" type="email" value="{{ form.email }}" required>
+    <label for="class_year">Class year (optional)</label>
+    <input id="class_year" name="class_year" value="{{ form.class_year }}" inputmode="numeric">
+    <label><input type="checkbox" name="consented" value="on" {{ 'checked' if form.consented }} style="width:auto"> The alumnus asked to be listed</label>
+    <label for="consent_date">Consent date (YYYY-MM-DD)</label>
+    <input id="consent_date" name="consent_date" value="{{ form.consent_date }}">
+    <p>
+      <button type="submit">Save</button>
+      <a href="/admin/listings">Back to listings</a>
+    </p>
+  </form>
+  {% if listing %}
+  <dl>
+    <dt>Recorded by</dt><dd>{{ listing.recorder_name }}</dd>
+    <dt>Created</dt><dd>{{ listing.created_at }}</dd>
+    <dt>Updated</dt><dd>{{ listing.updated_at }}</dd>
+  </dl>
+  {% endif %}
+{% endblock %}

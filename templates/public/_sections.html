@@ -17,3 +17,12 @@
   {% else %}<p>No events yet.</p>{% endif %}
 </section>
 {% endif %}
+{% if alumni is defined %}
+<section>
+  <h2>Alumni</h2>
+  {% if alumni %}
+  <ul>{% for name in alumni %}<li>{{ name }}</li>{% endfor %}</ul>
+  {% else %}<p>No alumni are listed yet.</p>{% endif %}
+  <p>To reach an alumnus, email Joe at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> and we will introduce you.</p>
+</section>
+{% endif %}

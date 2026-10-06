@@ -12,15 +12,17 @@ from __future__ import annotations
 import shutil
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from app import db, pages, posts, settings
+from app import db, listings, pages, posts, settings
 from app.markdown import render_markdown
 
 HOME_SLUG = "home"
 EVENTS_SLUG = "alumni-events"
-SECTION_SLUGS = ("team-schedule", EVENTS_SLUG, "alumni-network")
+NETWORK_SLUG = "alumni-network"
+SECTION_SLUGS = ("team-schedule", EVENTS_SLUG, NETWORK_SLUG)
 HOME_COUNT = 3  # Team Updates and Events shown on Home
 
 CSS = """/* Minimal starter styles — make them yours. */
@@ -77,6 +79,7 @@ def render_site(out: Path | None = None,
     try:
         published = pages.list_published(conn)
         published_posts = posts.list_published(conn)  # newest first
+        alumni_names = listings.consented_names(conn)  # names only (ADR-003)
     finally:
         conn.close()
 
@@ -98,7 +101,9 @@ def render_site(out: Path | None = None,
         "updates": updates[:HOME_COUNT], "events": events[:HOME_COUNT],
         "section_links": [{"title": by_slug[s]["title"], "href": _filename(s)}
                           for s in SECTION_SLUGS if s in by_slug]}
-    sections_for = {HOME_SLUG: home_sections, EVENTS_SLUG: {"events": events}}
+    sections_for: dict[str, dict[str, Any]] = {HOME_SLUG: home_sections, EVENTS_SLUG: {"events": events},
+                    NETWORK_SLUG: {"alumni": alumni_names,
+                                   "contact_email": settings.CONTACT_EMAIL}}
 
     common = dict(site_title=settings.SITE_TITLE, nav=nav, css_path="style.css",
                   home_path="index.html")

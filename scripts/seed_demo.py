@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import sys
 
-from app import db, pages, posts, settings, users
+from app import db, listings, pages, posts, settings, users
 
 
 def main() -> int:
@@ -72,9 +72,17 @@ def main() -> int:
                 posts.create(conn, title=title, slug=posts.slugify(title), body=body,
                              status=status, post_type=post_type, author_id=editor["id"])
             print("Created sample posts")
+        if editor is not None and not listings.list_listings(conn):
+            for name, email, year, consent in (
+                ("Sam Rivera", "sam.rivera@alumni.example.test", 2008, "2026-09-15"),
+                ("Alex Chen", "alex.chen@alumni.example.test", 2015, "2026-09-20"),
+                ("Jordan Lee", "jordan.lee@alumni.example.test", None, None),
+            ):
+                listings.create(conn, name=name, email=email, class_year=year,
+                                consent_date=consent, recorded_by=editor["id"])
+            print("Created sample listings (one without consent)")
     finally:
         conn.close()
-    # TODO (later tickets): listings.
     return 0
 
 
